@@ -46,6 +46,7 @@
 <script type="text/javascript">
     let rows = [];
     let selectedRows = [];
+    let user;
     var endpoint = 'https://jsonplaceholder.typicode.com'
     $(document).ready(function () {
         loadData();
@@ -79,9 +80,9 @@
     }
     function onEditClick() {
         if (selectedRows.length == 1) {
-            let userId = selectedRows[0].split("_")[0];
-            let rowId = selectedRows[0].split("_")[1];
-            let index = rows.findIndex(a => a.id == rowId);
+            userId = selectedRows[0].split("_")[0];
+            id = selectedRows[0].split("_")[1];
+            let index = rows.findIndex(a => a.id == id);
             if (index > -1) {
                 $("#userTableSection").hide();
                 $("#addEditForm").show();
@@ -94,41 +95,39 @@
     }
     function onSaveClick() {
         let isAdd = false;
-        let user = null;
         let url = '';
         let postType = 'POST';
         if ($("#tdUserId").html().length == 0) {
-            user = JSON.stringify({
+            user ={
                 title: $("#inputUserName").val(),
                 body: $("#textAreaDescription").val(),
                 userId: 1
-            });
+            };
             isAdd = true;
             url = endpoint + "/posts";
         } else {
-            user = JSON.stringify({
+            user = {
+                id: parseInt(id.toString()),
                 title: $("#inputUserName").val(),
                 body: $("#textAreaDescription").val(),
-                userId: 1,
-                id: parseInt($("#tdUserId").html())
-            });
+                userId: parseInt(userId.toString())
+            };
             isAdd = false;
             url = endpoint + "/posts/1";
             postType = "PUT";
         }
-        debugger;
         $.ajax({
             url: url,
             type: postType,
             contentType: "application/json; charset=UTF-8",
             dataType: 'json',
-            data: user,
+            data: JSON.stringify(user),
             success: function (result) {
                 onCancelClick();
                 if (isAdd)
                     bindData([result]);
                 else
-                    updateData(result);
+                    updateData(user);
             }
         });
     }
@@ -139,6 +138,7 @@
         $("#btnEdit").prop('disable', true);
         $("#btnEdit").removeClass('btn btn-info');
         $("#btnEdit").addClass('btn btn-secondary');
+        resetForm();
     }
     function deleteData(userId, rowId) {
         $.ajax({
@@ -214,5 +214,10 @@
             $("#tdUserTitle_" + user.id).html(user.title);
             $("#tdUserBody_" + user.id).html(user.body);
         }
+    }
+    function resetForm(){
+        $("#tdUserId").html('');
+        $("#inputUserName").val(''),
+        $("#textAreaDescription").val('');
     }
 </script>
